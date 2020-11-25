@@ -1,0 +1,85 @@
+#open_present_shadow{
+    animation: open_present_shadow 0.8s linear infinite alternate;  
+}
+@keyframes open_present_shadow{
+    /* from{
+        rx: 35px;
+        ry:5px;
+    } */
+    to{
+        rx: 20px;
+        ry:3px;
+    }
+  }
+
+#open_present{
+    transform-origin: center center;
+    animation: open_present 0.8s linear infinite alternate;  
+}
+@keyframes open_present{
+    80%{
+        transform: translateY(-1rem);
+    }
+    95%{
+        transform: translateY(-1rem) rotate(10deg);
+    }
+    100%{
+        transform: translateY(-1rem) rotate(-5deg);
+    }
+}
+
+.open_present_top{
+    transform-origin: center center;
+    animation: open_present_top 0.5s ease forwards 0s;  
+}
+@keyframes open_present_top{
+    /* 70% {       
+        opacity: 1;
+    } */
+    95%, 100% {
+        transform: translateY(-2rem) translateX(2rem) rotateZ(30deg);
+        /* opacity: 0; */
+    }
+}
+
+.present_bgLight{
+    transform-origin: center center;
+    animation: present_bgLight 0.5s ease forwards 0s;  
+}
+@keyframes present_bgLight{
+    95%, 100% {
+        transform: translateY(-1.5rem) scale(1.2);
+    }
+}
+
+.present_bear{
+    transform-origin: center center;
+    animation: present_bear 0.5s ease forwards 0s;  
+}
+@keyframes present_bear{
+    95%, 100% {
+        transform: translateY(-1rem) scale(1.2);
+    }
+}
+
+.present_card{
+    transform-origin: center center;
+    animation: present_card 0.5s ease forwards 0s;  
+}
+@keyframes present_card{
+    80%,100% {
+        /* transform: translateY(-3rem) translateX(-2rem) scale(1.5);*/
+        transform: translateY(-1rem) scale(1.2);
+    }
+}
+
+.present_balloon{
+    transform-origin: center center;
+    animation: present_balloon 0.5s ease forwards 0s;  
+}
+@keyframes present_balloon{
+    80%,100% {
+        /* transform: translateY(-3rem) translateX(-2rem) scale(1.5);*/
+        transform: translateY(-1rem) scale(1.2);
+    }
+}
