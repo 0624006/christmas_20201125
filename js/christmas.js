@@ -40,26 +40,29 @@ $(function () {
                 $('#bt_suc').off('click').on('click', function () {
                     btnSuc_fun();
                 });
+                $('#btn_clo').off('click').on('click', function () {                    
+                }); // close後返還當前按鍵值
                 break;
             case 'WR_NEW':
                 md_content.innerHTML = "<h4><font class='bg-danger text-white'>請確認是否重新抽取人選！</font></h4>";
                 $('#bt_suc').off('click').on('click', function () {
                     new_fu();
                 });
+                $('#btn_clo').off('click').on('click', function () {
+                    _flag_NtNw = true;
+                }); // close後返還當前按鍵值
                 break;
             case 'christmasMan':
                 md_content.innerHTML = "<h4><font class='bg-danger text-white'>請確認是否取回前一位得獎者！</font></h4>";
                 $('#bt_suc').off('click').on('click', function () {
                     enter_fu("Previous");
                 });
+                $('#btn_clo').off('click').on('click', function () {                    
+                }); // close後返還當前按鍵值
                 break;
             default:
                 break;
-        }
-
-        $('#btn_clo').off('click').on('click', function () {
-
-        }); // close後返還當前按鍵值
+        }       
 
     });
 
