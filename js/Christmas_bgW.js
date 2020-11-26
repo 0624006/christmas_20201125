@@ -7,8 +7,12 @@ var tree_light_D = "";//svg
 var bg_treeLight_color = "";//svg
 var enter_flag = true;
 
+var emp_no, emp_name, emp_dep;
+var xhr = new XMLHttpRequest();
+
 /* Loading */
 document.onreadystatechange = function () {
+
 	if (document.readyState === "complete") {
 		$('#loading').fadeOut();
 		$('.container').fadeIn();
@@ -19,11 +23,11 @@ document.onreadystatechange = function () {
 
 
 $(function () {
-	count_all = 0; //**資料更換，查詢資料庫是否有獎序，無則設定0，有就回傳目前最大值，此為判斷抽取上一人的btn用
-	if (count_all > "0") {
-		$("#christmasMan").attr("data-target", "#myModal");
-	}
+	count_all("ajax/emp_lottery.php", "action=emp_lottery_num_row");//設定初始值與modal_get
+	// count_all = 0; //**資料更換，查詢資料庫是否有獎序，無則設定0，有就回傳目前最大值，此為判斷抽取上一人的btn用
 	d = "0";//初始enter
+
+
 	bgC = 1; //背景圖數
 	$("#iframe_bg" + bgC).toggleClass("bg"); //初始背景1
 
@@ -52,11 +56,14 @@ $(function () {
 		d = "-1";//防止連續點enter
 		enter_flag = false;
 		if (click_data != "Previous") {
-			count_all += 1;			
-			msg_wds = `部門：MIS <br> 工號：0000${getRandom(1, 9)} <br> 姓名：ＸＸＸＸ`;//**資料更換
-		}
-		console.log(msg_wds);
-		document.getElementById('msg').innerHTML = msg_wds;
+			count_all += 1;
+			lottery();
+			// msg_wds = `部門：MIS <br> 工號：0000${getRandom(1, 9)} <br> 姓名：ＸＸＸＸ`;//**資料更換
+		}else{
+			lottery_previous();
+		}		
+		// console.log(msg_wds);
+		// document.getElementById('msg').innerHTML = msg_wds;
 		setTimeout(function () {
 			d = "1"; //2.5秒後才可按左右鍵
 			enter_flag = true;
@@ -66,7 +73,8 @@ $(function () {
 	}
 
 	/* 重新抽取當前獎項人選 */
-	function new_fu() {		
+	function new_fu() {
+		lottery_newupdate();
 		d = "0";//判斷按鍵enter	
 		$('#open_present_frame').focus();
 		count_all-=1;
@@ -77,8 +85,8 @@ $(function () {
 
 	/*** 清空獎項欄位 **/
 	function btnSuc_fun() {
-		alert("clear");		
-		/* **資料更換，清除資料庫紀錄抽取編號之資料欄位，並重新整理 */
+		alert("clear");
+		deleteAll();//清空資料庫
 		setTimeout(function () {
 			location.reload();
 		}, 500);
@@ -131,7 +139,8 @@ $(function () {
 			}
 			$('#open_present_frame').focus();
 			gift();
-			msg();				
+			msg();	
+			lottery_nextupdate();		
 		}
 	});
 
@@ -192,9 +201,149 @@ $(function () {
 		tree_light_D += 0.2;
 	});
 
-	/* 測試用，亂數替代，產出min(含) ~ max(含)之間的值 */
-	function getRandom(min, max) {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
-	};
+	//_ajax初始設定_data若沒有就設NULL
+	function count_all(url, data) {
+		xhr.open(
+			"post",
+			url,
+			true
+		);
+		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");//post要加
+		xhr.send(data);
+		xhr.onload = function () {
+			console.log(xhr.responseText); //有撈到資料
+			var get_value = JSON.parse(xhr.responseText); //字串轉成資料
+			console.log(get_value);
+			count_all = get_value;
+			if (count_all > "0") {
+				$("#christmasMan").attr("data-target", "#myModal");
+			}
+
+		};
+	}
+
+	//_ajax_清空資料庫
+	function deleteAll() {
+		$.ajax({
+			url: 'ajax/emp_lottery.php',
+			type: 'post',
+			cache: false,
+			dataType: 'text',
+			data: {
+				'action': 'emp_delete',
+			},
+			success: function (data) {
+				console.log(data);
+			},
+			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+		});
+	}
+
+	//_ajax_抽獎
+	function lottery() {
+		$.ajax({
+			url: 'ajax/emp_lottery.php',
+			type: 'post',
+			cache: false,
+			dataType: 'json',
+			data: {
+				'action': 'emp_lottery',
+			},
+			success: function (data) {
+				$.each(data, function (index, n) {
+					emp_dep = data[index].emp_dep;
+					emp_no = data[index].emp_no;
+					emp_name = data[index].emp_name;
+					msg_wds = `部門：${data[index].emp_dep} <br> 工號：${data[index].emp_no} <br> 姓名：${data[index].emp_name}`;//**資料更換
+					document.getElementById('msg').innerHTML = msg_wds;
+					console.log(data, emp_dep, emp_no, emp_name);
+				});
+			},
+			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+		});
+	}
+
+	//_ajax_next抽取下一位更新資料庫lottery=count_all
+	function lottery_nextupdate() {
+		$.ajax({
+			url: 'ajax/emp_lottery.php',
+			type: 'post',
+			cache: false,
+			dataType: 'text',
+			data: {
+				'action': 'emp_lottery_nextupdate',
+				'emp_no': emp_no,
+				'emp_lottery_num': count_all,
+			},
+			success: function (data) { },
+			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+		});
+	}
+
+	//_ajax_previous抽取上一位獲獎者
+	function lottery_previous() {
+		$.ajax({
+			url: 'ajax/emp_lottery.php',
+			type: 'post',
+			cache: false,
+			dataType: 'json',
+			data: {
+				'action': 'emp_lottery_previous',
+				'emp_lottery_num': count_all,
+			},
+			success: function (data) {
+				$.each(data, function (index, n) {
+					emp_dep = data[index].emp_dep;
+					emp_no = data[index].emp_no;
+					emp_name = data[index].emp_name;
+					msg_wds = `部門：${data[index].emp_dep} <br> 工號：${data[index].emp_no} <br> 姓名：${data[index].emp_name}`;//**資料更換
+					document.getElementById('msg').innerHTML = msg_wds;
+					console.log(data, emp_dep, emp_no, emp_name);
+				});
+			},
+			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+		});
+	}
+
+	//_ajax_New重抽新抽取
+	function lottery_newupdate() {
+		$.ajax({
+			url: 'ajax/emp_lottery.php',
+			type: 'post',
+			cache: false,
+			dataType: 'text',
+			data: {
+				'action': 'emp_lottery_newupdate',
+				'emp_lottery_num': count_all,
+			},
+			success: function (data) {},
+			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+		});
+	}
+
+	// /* 測試用，亂數替代，產出min(含) ~ max(含)之間的值 */
+	// function getRandom(min, max) {
+	// 	return Math.floor(Math.random() * (max - min + 1)) + min;
+	// };
+
+	// //_ajax_讀取資料庫內是否有抽獎編號，有則回傳該編號之最大值
+	// function lottery_num_row() {
+	// 	$.ajax({
+	// 		url: 'ajax/emp_lottery.php',
+	// 		type: 'post',
+	// 		cache: false,
+	// 		dataType: 'text',
+	// 		data: {
+	// 			'action': 'emp_lottery_num_row',
+	// 		},
+	// 		success: function (data) {
+	// 			count_all = data;
+	// 		},
+	// 		error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
+	// 	});
+	// }
+
+
+
 
 });
