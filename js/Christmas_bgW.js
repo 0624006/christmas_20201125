@@ -52,18 +52,18 @@ $(function () {
 
 	/* enter / 點選禮物盒觸發 */
 	function enter_fu(click_data) {
-		
+
 		d = "-1";//防止連續點enter
 		enter_flag = false;
 		if (click_data != "Previous") {
-			count_all += 1;
-			lottery();
+			// count_all += 1;
+			// lottery();
 			// msg_wds = `部門：MIS <br> 工號：0000${getRandom(1, 9)} <br> 姓名：ＸＸＸＸ`;//**資料更換
-		}else{
+		} else {
 			lottery_previous();
-		}		
+		}
 		// console.log(msg_wds);
-		// document.getElementById('msg').innerHTML = msg_wds;
+		document.getElementById('msg').innerHTML = msg_wds;
 		setTimeout(function () {
 			d = "1"; //2.5秒後才可按左右鍵
 			enter_flag = true;
@@ -77,9 +77,9 @@ $(function () {
 		lottery_newupdate();
 		d = "0";//判斷按鍵enter	
 		$('#open_present_frame').focus();
-		count_all-=1;
+		count_all -= 1;
 		gift();
-		msg();		
+		msg();
 		console.log(count_all);
 	}
 
@@ -132,20 +132,20 @@ $(function () {
 
 	/**    click     **/
 	$('#WR_NEXT').off('click').on('click', function () {
-		if (enter_flag) {			
+		if (enter_flag) {
 			d = "0";//判斷按鍵enter	
 			if (count_all > "0") {
 				$("#christmasMan").attr("data-target", "#myModal");
 			}
 			$('#open_present_frame').focus();
 			gift();
-			msg();	
-			lottery_nextupdate();		
+			msg();
+			lottery_nextupdate();
 		}
 	});
 
 	$('#open_present_frame').off('click').on('click', function () {
-		enter_fu();
+		lottery();
 	});
 
 	/** modal通知視窗 **/
@@ -172,7 +172,7 @@ $(function () {
 			case 'christmasMan':
 				md_content.innerHTML = "<h4><font class='bg-danger text-white'>請確認是否取回前一位得獎者！</font></h4>";
 				$('#bt_suc').off('click').on('click', function () {
-					enter_fu("Previous");					
+					enter_fu("Previous");
 				});
 				break;
 			default:
@@ -201,7 +201,7 @@ $(function () {
 		tree_light_D += 0.2;
 	});
 
-	//_ajax初始設定_data若沒有就設NULL
+	//_ajax_初始設定_data若沒有就設NULL
 	function count_all(url, data) {
 		xhr.open(
 			"post",
@@ -215,10 +215,14 @@ $(function () {
 			var get_value = JSON.parse(xhr.responseText); //字串轉成資料
 			console.log(get_value);
 			count_all = get_value;
-			if (count_all > "0") {
-				$("#christmasMan").attr("data-target", "#myModal");
+			if (count_all === "目前無報到人員") {
+				d = "-1"; //禁止modal彈出後按任何按鍵
+				alert("目前還未有任何人報到，無法進行抽獎！");
+			} else {
+				if (count_all > "0") {
+					$("#christmasMan").attr("data-target", "#myModal");
+				}
 			}
-
 		};
 	}
 
@@ -250,14 +254,23 @@ $(function () {
 				'action': 'emp_lottery',
 			},
 			success: function (data) {
-				$.each(data, function (index, n) {
-					emp_dep = data[index].emp_dep;
-					emp_no = data[index].emp_no;
-					emp_name = data[index].emp_name;
-					msg_wds = `部門：${data[index].emp_dep} <br> 工號：${data[index].emp_no} <br> 姓名：${data[index].emp_name}`;//**資料更換
-					document.getElementById('msg').innerHTML = msg_wds;
-					console.log(data, emp_dep, emp_no, emp_name);
-				});
+				var Obj_len = Object.keys(data).length;
+				console.log(Obj_len);
+				if (Obj_len != 1) {
+					d = "-1"; //禁止modal彈出後按任何按鍵
+					alert("人員數量小於獎項數量！");
+				} else {
+					count_all += 1;
+					$.each(data, function (index, n) {
+						emp_dep = data[index].emp_dep;
+						emp_no = data[index].emp_no;
+						emp_name = data[index].emp_name;
+						msg_wds = `部門：${data[index].emp_dep} <br> 工號：${data[index].emp_no} <br> 姓名：${data[index].emp_name}`;//**資料更換
+						// document.getElementById('msg').innerHTML = msg_wds;
+						console.log(data, emp_dep, emp_no, emp_name);
+					});
+					enter_fu();
+				}
 			},
 			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
 		});
@@ -275,7 +288,9 @@ $(function () {
 				'emp_no': emp_no,
 				'emp_lottery_num': count_all,
 			},
-			success: function (data) { },
+			success: function (data) {
+				console.log(data);
+			},
 			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
 		});
 	}
@@ -297,7 +312,7 @@ $(function () {
 					emp_no = data[index].emp_no;
 					emp_name = data[index].emp_name;
 					msg_wds = `部門：${data[index].emp_dep} <br> 工號：${data[index].emp_no} <br> 姓名：${data[index].emp_name}`;//**資料更換
-					document.getElementById('msg').innerHTML = msg_wds;
+					// document.getElementById('msg').innerHTML = msg_wds;
 					console.log(data, emp_dep, emp_no, emp_name);
 				});
 			},
@@ -316,7 +331,7 @@ $(function () {
 				'action': 'emp_lottery_newupdate',
 				'emp_lottery_num': count_all,
 			},
-			success: function (data) {},
+			success: function (data) { },
 			error: function (xhr) { alert("發生錯誤: " + xhr.status + " " + xhr.statusText); }
 		});
 	}
